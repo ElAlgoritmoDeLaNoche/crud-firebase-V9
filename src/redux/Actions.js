@@ -23,6 +23,11 @@ const addContact = () => ({
   type: types.ADD_CONTACT
 })
 
+export const reset = () => ({
+  type: types.RESET
+})
+
+
 export const getContactsInitiate = () => {
   return function (dispatch) {
     db.collection('contacts').onSnapshot((querySnapshot) => {

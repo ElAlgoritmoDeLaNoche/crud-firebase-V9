@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { addContactInitiate, getContactsInitiate, getContactInitiate, updateContactInitiate, deleteContactInitiate } from './redux/Actions'
-import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn, MDBTypography, MDBCard, MDBCardTitle, MDBCardText, MDBCardBody, MDBCardHeader, MDBIcon } from 'mdb-react-ui-kit'
+import { addContactInitiate, getContactsInitiate, getContactInitiate, updateContactInitiate, deleteContactInitiate, reset } from './redux/Actions'
+import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn, MDBTypography, MDBCard, MDBCardTitle, MDBCardText, MDBCardBody, MDBCardHeader, MDBIcon, MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter } from 'mdb-react-ui-kit'
 import { makeStyles } from '@material-ui/core'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -14,7 +14,7 @@ const initialState = {
   relationship: '', //Relación
 }
 
-const useStyles = makeStyles( () => ({
+const useStyles = makeStyles(() => ({
   root: {
     marginTop: 70,
     margin: "auto",
@@ -29,6 +29,7 @@ function App() {
   const classes = useStyles()
   const [state, setState] = useState(initialState)
   const [editMode, setEditMode] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   const [userId, setUserId] = useState(null)
   const [errorMsg, setErrorMsg] = useState(null)
 
@@ -46,6 +47,23 @@ function App() {
       setState({ ...singleContact })
     }
   }, [singleContact])
+
+  const handleModal = (id) => {
+    setModalOpen(true)
+    dispatch(getContactInitiate(id))
+  }
+
+  const handleCloseModal = () => {
+    setModalOpen(false)
+    dispatch(reset())
+  }
+
+  const modalBody = (
+    <div className="row">
+      <div className="col-sm-4">Fullname:</div>
+      <div className="col-sm-8">{singleContact.name} {singleContact.lastname}</div>
+    </div>
+  )
 
   const deleteContact = (id) => {
     if (window.confirm('Are you sure you want to delete this contact?')) {
@@ -68,12 +86,12 @@ function App() {
     e.preventDefault()
     if (!name || !lastname || !email || !company || !url || !birthday || !relationship) {
       setErrorMsg('Please fill all required inputs')
-    }else {
+    } else {
       if (!editMode) {
         dispatch(addContactInitiate(state))
         setState({ name: "", lastname: "", email: "", company: "", url: "", birthday: "", relationship: "" })
         setErrorMsg('')
-      }else {
+      } else {
         dispatch(updateContactInitiate(userId, state))
         setUserId(null)
         setEditMode(false)
@@ -88,14 +106,14 @@ function App() {
       <MDBRow>
         <MDBCol md='6'>
           <form onSubmit={handleSubmit} className={classes.root}>
-            <MDBTypography 
+            <MDBTypography
               className="text-start"
               variant='h4'
             >
-            {!editMode ? 'Add Contact' : 'Update Contact'}
+              {!editMode ? 'Add Contact' : 'Update Contact'}
             </MDBTypography>
-            {errorMsg && <h4 style={{ color: '#dd4b39'}}>{errorMsg}</h4>}
-            <MDBInput 
+            {errorMsg && <h4 style={{ color: '#dd4b39' }}>{errorMsg}</h4>}
+            <MDBInput
               label="Name"
               value={name || ''}
               name="name"
@@ -151,12 +169,12 @@ function App() {
               onChange={handleInputChange}
             />
             <br />
-            <MDBBtn 
-              style={{ width: '100%'}}
+            <MDBBtn
+              style={{ width: '100%' }}
               color={!editMode ? 'success' : 'warning'}
               type="submit"
             >
-            {!editMode ? "Submit" : "Edit"}
+              {!editMode ? "Submit" : "Edit"}
             </MDBBtn>
           </form>
         </MDBCol>
@@ -168,17 +186,19 @@ function App() {
                 <MDBCardTitle><b>Company:</b> {item.company}</MDBCardTitle>
                 <MDBCardText><b>Email:</b> {item.email}</MDBCardText>
                 <div className="buttons">
-                  <MDBBtn>
+                  <MDBBtn
+                    onClick={() => handleModal(item.id)}
+                  >
                     <MDBIcon fas icon="eye" size="lg" style={{ marginRight: '5px' }} />
                     View
                   </MDBBtn>
-                  <MDBBtn 
+                  <MDBBtn
                     onClick={() => editContact(item.id)}
                   >
                     <MDBIcon fas icon="pen" size="lg" style={{ marginRight: '5px' }} />
                     Edit
                   </MDBBtn>
-                  <MDBBtn 
+                  <MDBBtn
                     onClick={() => deleteContact(item.id)}
                   >
                     <MDBIcon fas icon="trash" size="lg" style={{ marginRight: '5px' }} />
@@ -188,7 +208,34 @@ function App() {
                 <br />
                 <MDBBtn style={{ width: '100%' }}>PDF</MDBBtn>
               </MDBCardBody>
+              {modalOpen && (
+                <MDBModal show={modalOpen} tabIndex='-1'>
+                  <MDBModalDialog>
+                    <MDBModalContent>
+                      <MDBModalHeader>
+                        <MDBModalTitle style={{ color: '#333333' }}>Contact Info</MDBModalTitle>
+                        <MDBBtn
+                          className='btn-close'
+                          color='none' onClick={handleCloseModal}
+                        ></MDBBtn>
+                      </MDBModalHeader>
+                        <MDBModalBody style={{ color: '#333333' }}>
+                          {modalBody}
+                        </MDBModalBody>
+                      <MDBModalFooter>
+                        <MDBBtn
+                          color='secondary'
+                          onClick={handleCloseModal}
+                        >
+                          Close
+                        </MDBBtn>
+                      </MDBModalFooter>
+                    </MDBModalContent>
+                  </MDBModalDialog>
+                </MDBModal>
+              )}
             </MDBCard>
+
           ))}
 
         </MDBCol>
