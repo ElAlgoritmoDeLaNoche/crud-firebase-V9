@@ -3,6 +3,7 @@ import { addContactInitiate, getContactsInitiate, getContactInitiate, updateCont
 import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn, MDBTypography, MDBCard, MDBCardTitle, MDBCardText, MDBCardBody, MDBCardHeader, MDBIcon, MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter } from 'mdb-react-ui-kit'
 import { makeStyles } from '@material-ui/core'
 import { useDispatch, useSelector } from 'react-redux'
+import { Document, Page, Text, View, PDFDownloadLink } from '@react-pdf/renderer'
 
 const initialState = {
   name: '', //Nombre
@@ -62,7 +63,38 @@ function App() {
     <div className="row">
       <div className="col-sm-4">Fullname:</div>
       <div className="col-sm-8">{singleContact.name} {singleContact.lastname}</div>
+      <div className="col-sm-4">Email:</div>
+      <div className="col-sm-8">{singleContact.email}</div>
+      <div className="col-sm-4">Company:</div>
+      <div className="col-sm-8">{singleContact.company}</div>
+      <div className="col-sm-4">URL:</div>
+      <div className="col-sm-8">{singleContact.url}</div>
+      <div className="col-sm-4">Birthday:</div>
+      <div className="col-sm-8">{singleContact.birthday}</div>
+      <div className="col-sm-4">Relationship:</div>
+      <div className="col-sm-8">{singleContact.relationship}</div>
     </div>
+  )
+
+  const handlePdfDownload = (
+    <Document>
+      <Page size="A4">
+        <View style={{ display: 'flex', flexDirection: 'colum', justifyContent: 'center', alignItems: 'center' }}>
+          <view><Text>Fullname:</Text></view>
+          <view><Text>{singleContact.name} {singleContact.lastname}</Text></view>
+          <view><Text>Email:</Text></view>
+          <view><Text>{singleContact.email}</Text></view>
+          <view><Text>Company:</Text></view>
+          <view><Text>{singleContact.company}</Text></view>
+          <view><Text>Url:</Text></view>
+          <view><Text>{singleContact.url}</Text></view>
+          <view><Text>Birthday:</Text></view>
+          <view><Text>{singleContact.birthday}</Text></view>
+          <view><Text>Relationship:</Text></view>
+          <view><Text>{singleContact.relationship}</Text></view>
+        </View>
+      </Page>
+    </Document>
   )
 
   const deleteContact = (id) => {
@@ -206,7 +238,6 @@ function App() {
                   </MDBBtn>
                 </div>
                 <br />
-                <MDBBtn style={{ width: '100%' }}>PDF</MDBBtn>
               </MDBCardBody>
               {modalOpen && (
                 <MDBModal show={modalOpen} tabIndex='-1'>
@@ -219,9 +250,9 @@ function App() {
                           color='none' onClick={handleCloseModal}
                         ></MDBBtn>
                       </MDBModalHeader>
-                        <MDBModalBody style={{ color: '#333333' }}>
-                          {modalBody}
-                        </MDBModalBody>
+                      <MDBModalBody style={{ color: '#333333' }}>
+                        {modalBody}
+                      </MDBModalBody>
                       <MDBModalFooter>
                         <MDBBtn
                           color='secondary'
@@ -229,6 +260,12 @@ function App() {
                         >
                           Close
                         </MDBBtn>
+                        <PDFDownloadLink
+                          document={handlePdfDownload}
+                          filename="document.pdf"
+                        >
+                          <MDBBtn style={{ width: '100%' }}>PDF</MDBBtn>
+                        </PDFDownloadLink>
                       </MDBModalFooter>
                     </MDBModalContent>
                   </MDBModalDialog>
